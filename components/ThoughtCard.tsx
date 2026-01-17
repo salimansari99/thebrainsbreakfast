@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { Heart, MessageCircle } from "lucide-react";
+import { useSession, signIn } from "next-auth/react";
+import { useState } from "react";
 
 type ThoughtCardProps = {
   id: string;
@@ -8,6 +13,9 @@ type ThoughtCardProps = {
   category: string;
   imageUrl?: string;
   readTime?: string;
+  initialLikes?: number;
+  initialComments?: number;
+  initiallyLiked?: boolean;
 };
 
 export default function ThoughtCard({
@@ -18,16 +26,50 @@ export default function ThoughtCard({
   category,
   imageUrl,
   readTime = "3 min read",
+  initialLikes = 0,
+  initialComments = 0,
+  initiallyLiked = false,
 }: ThoughtCardProps) {
+  const { data: session } = useSession();
+
+  const [liked, setLiked] = useState(initiallyLiked);
+  const [likes, setLikes] = useState(initialLikes);
+
+  async function handleLike(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!session) {
+      signIn(); // or open login modal
+      return;
+    }
+
+    // optimistic update
+    setLiked(!liked);
+    setLikes((prev) => (liked ? prev - 1 : prev + 1));
+
+    await fetch(`/api/thoughts/${id}/like`, {
+      method: "POST",
+    });
+  }
+
+  function handleCommentClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Navigate directly to comments section
+    window.location.href = `/thoughts/${id}#comments`;
+  }
+
   return (
     <article className="group">
       <Link
-        href={`/post/${id}`}
+        href={`/thoughts/${id}`}
         className="flex gap-6 items-start md:items-center"
       >
         {/* Text Content */}
-        <div className="flex-1 space-y-3">
-          {/* Category Chip */}
+        <div className="flex-1 space-y-4">
+          {/* Category */}
           <span className="inline-block text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
             {category}
           </span>
@@ -42,15 +84,42 @@ export default function ThoughtCard({
             {excerpt}
           </p>
 
-          {/* Meta */}
-          <div className="flex items-center gap-3 text-sm text-gray-400">
-            <span>{date}</span>
-            <span>·</span>
-            <span>{readTime}</span>
+          {/* Meta + Actions */}
+          <div className="flex items-center justify-between">
+            {/* Meta */}
+            <div className="flex items-center gap-3 text-sm text-gray-400">
+              <span>{date}</span>
+              <span>·</span>
+              <span>{readTime}</span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-5 text-sm text-gray-500">
+              {/* Like */}
+              <button
+                onClick={handleLike}
+                className="flex items-center gap-1 hover:text-red-500 transition"
+              >
+                <Heart
+                  size={16}
+                  className={liked ? "fill-red-500 text-red-500" : ""}
+                />
+                {likes}
+              </button>
+
+              {/* Comment */}
+              {/* <button
+                onClick={handleCommentClick}
+                className="flex items-center gap-1 hover:text-black dark:hover:text-white transition"
+              >
+                <MessageCircle size={16} />
+                {initialComments}
+              </button> */}
+            </div>
           </div>
         </div>
 
-        {/* Thumbnail Image */}
+        {/* Image */}
         {imageUrl && (
           <img
             src={imageUrl}

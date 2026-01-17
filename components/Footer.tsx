@@ -7,7 +7,7 @@ export default function Footer() {
         {/* Brand */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold tracking-tight">
-            Thought<span className="text-indigo-500">.</span>
+            The Brains Breakfast<span className="text-indigo-500">.</span>
           </h2>
           <p className="text-sm text-gray-500 max-w-xs">
             A daily pause for reflection. One meaningful thought, every single
@@ -51,7 +51,7 @@ export default function Footer() {
             Built with focus, simplicity, and care.
           </p>
           <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} Thought.
+            © {new Date().getFullYear()} The Brains Breakfast.
             <br />
             All rights reserved.
           </p>

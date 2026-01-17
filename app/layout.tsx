@@ -1,4 +1,5 @@
 import "./globals.css";
+import Providers from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -15,9 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-white dark:bg-black text-gray-900 dark:text-gray-100 transition-colors">
-        <Navbar />
-        <main className="pt-20">{children}</main>
-        <Footer />
+        <Providers>
+          <Navbar />
+          <main className="pt-20">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

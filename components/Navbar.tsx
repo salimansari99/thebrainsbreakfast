@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User } from "lucide-react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import ThemeToggle from "./ThemeToggle";
 
 const navItems = [
@@ -14,8 +15,11 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [userMenu, setUserMenu] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -36,7 +40,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="font-semibold text-lg tracking-tight">
-          Thought<span className="text-indigo-500">.</span>
+          The Brains Breakfast<span className="text-indigo-500">.</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -59,7 +63,67 @@ export default function Navbar() {
               </Link>
             );
           })}
+
           <ThemeToggle />
+
+          {/* Auth Section */}
+          {status === "loading" ? null : session ? (
+            <div className="relative">
+              <button
+                onClick={() => setUserMenu(!userMenu)}
+                className="flex items-center gap-2 text-sm"
+              >
+                {session.user?.image ? (
+                  <img
+                    src={session.user.image}
+                    alt="Avatar"
+                    className="w-8 h-8 rounded-full"
+                  />
+                ) : (
+                  <User size={18} />
+                )}
+              </button>
+
+              {userMenu && (
+                <div
+                  onClick={() => setUserMenu(!userMenu)}
+                  className="absolute right-0 mt-3 w-48 rounded-xl border bg-white dark:bg-black shadow-lg p-2 text-sm"
+                >
+                  <Link
+                    href="/me"
+                    className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900"
+                  >
+                    Profile
+                  </Link>
+
+                  {session.user.role === "ADMIN" && (
+                    <Link
+                      href="/admin"
+                      className="block px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900"
+                    >
+                      Admin
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={() => signOut()}
+                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 flex items-center gap-2"
+                  >
+                    <LogOut size={14} />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => signIn("google")}
+              className="flex items-center gap-2 text-sm px-4 py-2 rounded-full border hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition"
+            >
+              <LogIn size={16} />
+              Sign in
+            </button>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -77,7 +141,6 @@ export default function Navbar() {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
           className="md:hidden bg-white dark:bg-black border-t"
         >
           <div className="px-6 py-4 space-y-4">
@@ -91,7 +154,47 @@ export default function Navbar() {
                 {item.name}
               </Link>
             ))}
+
             <ThemeToggle />
+
+            {/* Mobile Auth */}
+            {session ? (
+              <>
+                <Link
+                  href="/me"
+                  onClick={() => setOpen(false)}
+                  className="block text-sm"
+                >
+                  Profile
+                </Link>
+
+                {session.user.role === "ADMIN" && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setOpen(false)}
+                    className="block text-sm"
+                  >
+                    Admin
+                  </Link>
+                )}
+
+                <button
+                  onClick={() => signOut()}
+                  className="text-sm text-left flex items-center gap-2"
+                >
+                  <LogOut size={14} />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => signIn("google")}
+                className="flex items-center gap-2 text-sm"
+              >
+                <LogIn size={16} />
+                Sign in
+              </button>
+            )}
           </div>
         </motion.div>
       )}
