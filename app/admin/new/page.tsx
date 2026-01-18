@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { uploadImage } from "@/lib/uploadImage";
 
 const categories = ["Life", "Motivation", "Success", "Tech"];
 
 export default function CreateThoughtPage() {
+  const router = useRouter();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
@@ -12,6 +16,10 @@ export default function CreateThoughtPage() {
   const [publishDate, setPublishDate] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
+  const [loading, setLoading] = useState(false);
+  const [action, setAction] = useState<"PUBLISHED" | "DRAFT" | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -24,6 +32,46 @@ export default function CreateThoughtPage() {
   function removeImage() {
     setImage(null);
     setPreview(null);
+  }
+
+  async function submit(type: "PUBLISHED" | "DRAFT") {
+    try {
+      setAction(type);
+      setLoading(true);
+      setError(null);
+
+      let imageUrl = "";
+
+      if (image) {
+        imageUrl = await uploadImage(image);
+      }
+
+      const res = await fetch("/api/admin/thoughts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content,
+          excerpt: content.slice(0, 140),
+          category,
+          author,
+          imageUrl: imageUrl || undefined,
+          publishDate:
+            type === "PUBLISHED" && publishDate ? publishDate : undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Something went wrong");
+      }
+
+      router.push("/admin/thoughts");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -102,74 +150,65 @@ export default function CreateThoughtPage() {
       {/* Title */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-500">Title</label>
-
-        <div className="rounded-xl border border-gray-200 dark:border-gray-800 focus-within:border-indigo-500 transition">
+        <div className="rounded-xl border focus-within:border-indigo-500">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Write a clear, thoughtful title"
-            className="w-full px-4 py-3 text-xl font-semibold bg-transparent placeholder-gray-400 focus:outline-none"
+            className="w-full px-4 py-3 text-xl font-semibold bg-transparent focus:outline-none"
           />
         </div>
-
-        <p className="text-xs text-gray-400">
-          Titles work best when they are simple and specific.
-        </p>
       </div>
 
       {/* Content */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-500">Content</label>
-
-        <div className="rounded-xl border border-gray-200 dark:border-gray-800 focus-within:border-indigo-500 transition">
+        <div className="rounded-xl border focus-within:border-indigo-500">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Tell your story..."
             rows={12}
-            className="w-full px-5 py-4 text-lg leading-relaxed bg-transparent resize-none placeholder-gray-400 focus:outline-none"
+            className="w-full px-5 py-4 text-lg resize-none bg-transparent focus:outline-none"
           />
         </div>
-
-        <p className="text-xs text-gray-400">
-          Write naturally. You can format and polish later.
-        </p>
       </div>
 
       {/* Meta */}
       <div className="grid sm:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Author</label>
-          <input
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            placeholder="Your name"
-            className="w-full rounded-lg border p-3"
-          />
-        </div>
+        <input
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          placeholder="Author"
+          className="rounded-lg border p-3"
+        />
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Publish date</label>
-          <input
-            type="date"
-            value={publishDate}
-            onChange={(e) => setPublishDate(e.target.value)}
-            className="w-full rounded-lg border p-3"
-          />
-        </div>
+        <input
+          type="date"
+          value={publishDate}
+          onChange={(e) => setPublishDate(e.target.value)}
+          className="rounded-lg border p-3"
+        />
       </div>
+
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
       {/* Actions */}
       <div className="flex gap-4 pt-12 pb-8">
-        <button className="px-8 py-3 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition">
-          Publish
+        {/* Publish */}
+        <button
+          disabled={loading}
+          onClick={() => submit("PUBLISHED")}
+          className="px-8 py-3 rounded-full bg-indigo-600 text-white disabled:opacity-50"
+        >
+          {loading && action === "PUBLISHED" ? "Publishing..." : "Publish"}
         </button>
 
+        {/* Draft */}
         <button
-          type="button"
-          className="px-8 py-3 rounded-full border hover:bg-gray-100 dark:hover:bg-gray-900 transition"
+          disabled={loading}
+          onClick={() => submit("DRAFT")}
+          className="px-8 py-3 rounded-full border disabled:opacity-50"
         >
-          Save draft
+          {loading && action === "DRAFT" ? "Saving..." : "Save draft"}
         </button>
       </div>
     </section>

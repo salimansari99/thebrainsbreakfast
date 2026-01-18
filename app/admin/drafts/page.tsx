@@ -5,13 +5,13 @@ import { requireAdmin } from "@/lib/adminGaurd";
 import { DeleteThought } from "@/components/DeleteThought";
 import { PublishToggle } from "@/components/admin/PublishToggle";
 
-export default async function AdminThoughts() {
+export default async function AdminDraftsPage() {
   // 🔐 Protect admin page
   await requireAdmin();
   await connectDB();
 
-  const thoughts = await Thought.find()
-    .sort({ publishDate: -1, createdAt: -1 })
+  const drafts = await Thought.find({ status: "DRAFT" })
+    .sort({ updatedAt: -1 })
     .lean();
 
   return (
@@ -19,9 +19,9 @@ export default async function AdminThoughts() {
       {/* ================= Header ================= */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold">Manage Thoughts</h1>
+          <h1 className="text-3xl font-semibold">Drafts</h1>
           <p className="text-gray-500 mt-1">
-            Create, edit, publish, or remove thoughts.
+            Unpublished thoughts you’re still working on.
           </p>
         </div>
 
@@ -35,24 +35,24 @@ export default async function AdminThoughts() {
 
       {/* ================= List ================= */}
       <div className="space-y-3">
-        {thoughts.map((thought: any) => {
-          const displayDate =
-            thought.publishDate && thought.publishDate > new Date("2000-01-01")
-              ? thought.publishDate
-              : thought.createdAt;
+        {drafts.map((draft: any) => {
+          const lastEdited = draft.updatedAt || draft.createdAt;
 
           return (
             <div
-              key={thought._id.toString()}
+              key={draft._id.toString()}
               className="p-4 rounded-xl border bg-white dark:bg-black flex items-center justify-between gap-6"
             >
               {/* Left */}
               <div className="min-w-0 space-y-1">
-                <p className="font-medium truncate">{thought.title}</p>
+                <p className="font-medium truncate">
+                  {draft.title || "Untitled Draft"}
+                </p>
 
                 <div className="flex items-center gap-3 text-sm text-gray-500 flex-wrap">
                   <span>
-                    {new Date(displayDate).toLocaleDateString("en-US", {
+                    Last edited{" "}
+                    {new Date(lastEdited).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
@@ -61,19 +61,14 @@ export default async function AdminThoughts() {
 
                   <span>·</span>
 
-                  <span className="capitalize">{thought.category}</span>
+                  <span className="capitalize">
+                    {draft.category || "General"}
+                  </span>
 
                   <span>·</span>
 
-                  {/* Status */}
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      thought.status === "PUBLISHED"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {thought.status}
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 font-medium">
+                    DRAFT
                   </span>
                 </div>
               </div>
@@ -81,36 +76,27 @@ export default async function AdminThoughts() {
               {/* Right Actions */}
               <div className="flex items-center gap-4 text-sm shrink-0">
                 <Link
-                  href={`/thoughts/${thought.slug}`}
-                  className="text-gray-500 hover:underline"
-                >
-                  View
-                </Link>
-
-                <Link
-                  href={`/admin/edit/${thought.slug}`}
+                  href={`/admin/edit/${draft.slug}`}
                   className="text-indigo-600 hover:underline"
                 >
                   Edit
                 </Link>
-                <PublishToggle
-                  slug={thought.slug}
-                  initialStatus={thought.status}
-                />
 
-                <DeleteThought slug={thought.slug} />
+                {/* Publish toggle */}
+                <PublishToggle slug={draft.slug} initialStatus={draft.status} />
+
+                {/* Delete */}
+                <DeleteThought slug={draft.slug} />
               </div>
             </div>
           );
         })}
 
         {/* ================= Empty ================= */}
-        {thoughts.length === 0 && (
-          <div className="py-16 text-center text-gray-500">
-            <p className="text-lg font-medium">No thoughts yet</p>
-            <p className="text-sm mt-2">
-              Start by creating your first thought.
-            </p>
+        {drafts.length === 0 && (
+          <div className="py-20 text-center text-gray-500">
+            <p className="text-lg font-medium">No drafts</p>
+            <p className="text-sm mt-2">All your thoughts are published 🎉</p>
           </div>
         )}
       </div>
