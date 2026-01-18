@@ -75,7 +75,7 @@ export default function Navbar() {
               >
                 {session.user?.image ? (
                   <img
-                    src={session.user.image}
+                    src={session.user.image || "/user-avatar.png"}
                     alt="Avatar"
                     className="w-8 h-8 rounded-full"
                   />

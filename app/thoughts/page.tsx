@@ -1,18 +1,116 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ThoughtCard from "@/components/ThoughtCard";
 
 const categories = ["All", "Life", "Motivation", "Success", "Tech"];
+const PAGE_SIZE = 6;
+
+type Thought = {
+  id: string;
+  category: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  date: string;
+  imageUrl?: string;
+  readTime?: string;
+};
 
 export default function ThoughtsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  const [thoughts, setThoughts] = useState<Thought[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const abortRef = useRef<AbortController | null>(null);
+
+  /* =========================
+     Debounce Search
+  ========================== */
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  /* =========================
+     Reset on Filter Change
+  ========================== */
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+  }, [activeCategory, debouncedQuery]);
+
+  /* =========================
+     Fetch Thoughts
+  ========================== */
+  useEffect(() => {
+    if (loading) return;
+
+    async function fetchThoughts() {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: PAGE_SIZE.toString(),
+        });
+
+        if (activeCategory !== "All") {
+          params.append("category", activeCategory);
+        }
+
+        if (debouncedQuery) {
+          params.append("q", debouncedQuery);
+        }
+
+        const res = await fetch(`/api/thoughts?${params.toString()}`, {
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch thoughts");
+        }
+
+        const data = await res.json();
+
+        setThoughts((prev) =>
+          page === 1 ? data.thoughts : [...prev, ...data.thoughts],
+        );
+        setHasMore(data.hasMore);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          setError("Something went wrong. Please try again.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchThoughts();
+
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, [page, activeCategory, debouncedQuery]);
 
   return (
     <section className="max-w-5xl mx-auto px-6 py-20">
-      {/* Header */}
-      <header className="mb-14 space-y-6">
+      {/* =========================
+          Header
+      ========================== */}
+      <header className="mb-16 space-y-8">
         <div className="space-y-2">
           <h1 className="text-4xl font-semibold tracking-tight">
             All Thoughts
@@ -40,41 +138,75 @@ export default function ThoughtsPage() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-1.5 text-sm rounded-full transition ${
-                  active
-                    ? "bg-black text-white dark:bg-white dark:text-black"
-                    : "border hover:bg-gray-100 dark:hover:bg-gray-900"
-                }`}
+                className={`px-4 py-1.5 text-sm rounded-full transition
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+    ${
+      active
+        ? "bg-black text-white dark:bg-white dark:text-black"
+        : "border hover:bg-gray-100 dark:hover:bg-gray-900"
+    }`}
               >
                 {cat}
               </button>
             );
           })}
         </div>
+
+        {/* Result count */}
+        <div className="h-5">
+          <p className="text-sm text-gray-400">
+            {thoughts.length} thought{thoughts.length !== 1 && "s"} loaded
+          </p>
+        </div>
       </header>
 
-      {/* Feed (Medium-style vertical rhythm) */}
-      <div className="space-y-10">
-        {[...Array(6)].map((_, i) => (
+      {/* =========================
+          Feed
+      ========================== */}
+      <div className="space-y-12">
+        {thoughts.map((t) => (
           <ThoughtCard
-            key={i}
-            id="1"
-            category="Motivation"
-            title="Your Comfort Zone Will Kill Your Dreams"
-            excerpt="Growth begins the moment you step outside familiarity and embrace uncertainty..."
-            date="Jan 14, 2026"
-            imageUrl="https://media.istockphoto.com/id/1344939844/photo/hand-holding-drawing-virtual-lightbulb-with-brain-on-bokeh-background-for-creative-and-smart.jpg?s=1024x1024&w=is&k=20&c=fZi9_l3-fcMPHTEDVinuavkZnG9zh_bkX8lWjKVJsf4="
-            readTime="4 min read"
+            key={t.slug}
+            id={t.id}
+            slug={t.slug}
+            title={t.title}
+            excerpt={t.excerpt}
+            category={t.category}
+            date={t.date}
+            imageUrl={t.imageUrl}
+            readTime={t.readTime}
           />
         ))}
+
+        {/* Loading */}
+        <p
+          className={`text-center text-sm text-gray-400 transition-opacity ${
+            loading ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          Loading thoughts…
+        </p>
+
+        {/* Error */}
+        {error && <p className="text-center text-sm text-red-500">{error}</p>}
+
+        {/* Empty */}
+        {!loading && !error && thoughts.length === 0 && (
+          <div className="py-20 text-center text-gray-500">
+            <p className="text-lg font-medium">No thoughts found</p>
+            <p className="text-sm mt-2">Try a different keyword or category.</p>
+          </div>
+        )}
       </div>
 
-      {/* Load More */}
-      <div className="mt-20 flex justify-center">
-        <button className="px-8 py-3 rounded-full border text-sm hover:bg-black hover:text-white transition">
+      {/* =========================
+          Load More
+      ========================== */}
+      {hasMore && (
+        <button disabled={loading} onClick={() => setPage((p) => p + 1)}>
           Load more thoughts
         </button>
-      </div>
+      )}
     </section>
   );
 }

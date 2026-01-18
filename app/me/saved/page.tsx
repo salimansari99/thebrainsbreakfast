@@ -9,6 +9,7 @@ export default function SavedPostsPage() {
         <ThoughtCard
           id="1"
           title="Discipline Beats Motivation"
+          slug="discipline-beats-motivation"
           excerpt="Motivation fades. Systems stay."
           date="Jan 12, 2026"
           category="Life"
