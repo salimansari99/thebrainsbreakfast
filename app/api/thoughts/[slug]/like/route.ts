@@ -4,7 +4,10 @@ import { connectDB } from "@/lib/db";
 import Thought from "@/models/Thought";
 import { NextResponse } from "next/server";
 
-export async function POST(_: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  _: Request,
+  { params }: { params: Promise<{ slug: string }> },
+) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -12,7 +15,12 @@ export async function POST(_: Request, { params }: { params: { id: string } }) {
 
   await connectDB();
 
-  const thought = await Thought.findById(params.id);
+  const { slug } = await params;
+
+  const thought = await Thought.findOne({
+    slug: slug.toLowerCase(),
+    status: "PUBLISHED",
+  }).lean();
   if (!thought) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

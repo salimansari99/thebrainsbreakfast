@@ -3,11 +3,18 @@ import { connectDB } from "@/lib/db";
 import Thought from "@/models/Thought";
 import { requireAdmin } from "@/lib/adminGaurd";
 
-export async function POST(_: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  _: Request,
+  { params }: { params: Promise<{ slug: string }> },
+) {
   await requireAdmin();
   await connectDB();
 
-  const thought = await Thought.findById(params.id);
+  const { slug } = await params;
+
+  const thought = await Thought.findOne({
+    slug: slug.toLowerCase(),
+  });
   if (!thought) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

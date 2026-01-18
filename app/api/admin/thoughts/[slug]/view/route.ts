@@ -4,11 +4,12 @@ import Thought from "@/models/Thought";
 
 export async function POST(
   _: Request,
-  { params }: { params: { slug: string } },
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   await connectDB();
+  const { slug } = await params;
 
-  const thought = await Thought.findOne({ slug: params.slug });
+  const thought = await Thought.findOne({ slug });
   if (!thought) return new Response(null, { status: 404 });
 
   const date = new Date().toISOString().slice(0, 10);

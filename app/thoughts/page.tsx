@@ -167,6 +167,7 @@ export default function ThoughtsPage() {
         {thoughts.map((t) => (
           <ThoughtCard
             key={t.slug}
+            id={t.id}
             slug={t.slug}
             title={t.title}
             excerpt={t.excerpt}

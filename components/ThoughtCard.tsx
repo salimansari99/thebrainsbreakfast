@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 type ThoughtCardProps = {
+  id: string;
   slug: string; // ✅ use slug
   title: string;
   excerpt: string;
@@ -13,6 +14,7 @@ type ThoughtCardProps = {
 };
 
 export default function ThoughtCard({
+  id,
   slug,
   title,
   excerpt,
