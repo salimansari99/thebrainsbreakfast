@@ -4,6 +4,7 @@ import Thought from "@/models/Thought";
 import { requireAdmin } from "@/lib/adminGaurd";
 import { DeleteThought } from "@/components/DeleteThought";
 import { PublishToggle } from "@/components/admin/PublishToggle";
+import FeatureToggle from "@/components/admin/FeatureToggle";
 
 export default async function AdminThoughts() {
   // 🔐 Protect admin page
@@ -86,6 +87,10 @@ export default async function AdminThoughts() {
                 >
                   View
                 </Link>
+                <FeatureToggle
+                  slug={thought.slug}
+                  initialFeatured={thought.isFeatured}
+                />
 
                 <Link
                   href={`/admin/edit/${thought.slug}`}

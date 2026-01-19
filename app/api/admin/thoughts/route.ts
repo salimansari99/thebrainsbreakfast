@@ -41,7 +41,9 @@ export async function POST(req: Request) {
       ...data,
       slug,
       status: data.publishDate ? "PUBLISHED" : "DRAFT",
-      publishDate: data.publishDate ?? new Date(),
+      publishDate: data.publishDate
+        ? new Date(data.publishDate + "T12:00:00Z")
+        : new Date(),
     });
 
     return NextResponse.json(thought, { status: 201 });

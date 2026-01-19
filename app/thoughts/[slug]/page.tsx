@@ -19,8 +19,6 @@ export default async function ThoughtPage({
     status: "PUBLISHED",
   }).lean();
 
-  console.log(thought, "thought");
-
   if (!thought) {
     return (
       <div className="py-24 text-center text-gray-500">Thought not found</div>
