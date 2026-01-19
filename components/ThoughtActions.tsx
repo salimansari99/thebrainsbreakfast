@@ -37,18 +37,32 @@ export default function ThoughtActions({
   }
 
   return (
-    <div className="sticky top-24 mb-2 flex gap-6 text-sm text-gray-500">
+    <div className="sticky top-24 mb-4 flex gap-8 text-sm">
+      {/* Like */}
       <button
         onClick={handleLike}
-        className="flex items-center gap-2 hover:text-black transition"
+        className="
+          flex items-center gap-2 transition
+          text-gray-500
+          hover:text-black
+          dark:text-gray-400
+          dark:hover:text-white
+        "
       >
         <Heart size={18} className={liked ? "fill-red-500 text-red-500" : ""} />
         {likes}
       </button>
 
+      {/* Share */}
       <button
         onClick={handleShare}
-        className="flex items-center gap-2 hover:text-black transition"
+        className="
+          flex items-center gap-2 transition
+          text-gray-500
+          hover:text-black
+          dark:text-gray-400
+          dark:hover:text-white
+        "
       >
         <Share2 size={18} />
         Share
