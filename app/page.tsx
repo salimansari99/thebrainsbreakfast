@@ -2,6 +2,8 @@ import Link from "next/link";
 import { connectDB } from "@/lib/db";
 import Thought from "@/models/Thought";
 
+export const revalidate = 600; // 10 minutes caching
+
 export default async function Home() {
   await connectDB();
 
