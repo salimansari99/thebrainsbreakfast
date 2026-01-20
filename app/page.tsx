@@ -92,7 +92,10 @@ export default async function Home() {
                 <Link href={`/thoughts/${thought.slug}`}>{thought.title}</Link>
               </h2>
 
-              <p className="text-gray-500 line-clamp-2">{thought.excerpt}</p>
+              <p
+                className="text-gray-500 line-clamp-2"
+                dangerouslySetInnerHTML={{ __html: thought.excerpt }}
+              ></p>
 
               <div className="flex items-center gap-3 text-sm text-gray-400">
                 <span>

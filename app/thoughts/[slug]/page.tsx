@@ -76,13 +76,20 @@ export default async function ThoughtPage({
         <img
           src={thought.imageUrl}
           alt={thought.title}
-          className="rounded-2xl mb-14 w-full object-cover"
+          className="
+        w-full
+        h-[220px]
+        md:h-[320px]
+        rounded-2xl
+        object-cover
+        bg-gray-100
+        dark:bg-gray-900"
         />
       )}
 
       {/* ================= Content ================= */}
       <div
-        className="
+        className="mt-8
           prose prose-lg dark:prose-invert
           max-w-none
           prose-p:leading-relaxed

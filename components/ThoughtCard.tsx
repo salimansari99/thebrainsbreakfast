@@ -48,9 +48,10 @@ export default function ThoughtCard({
             {title}
           </h2>
 
-          <p className="text-gray-500 leading-relaxed line-clamp-2">
-            {excerpt}
-          </p>
+          <p
+            className="text-gray-500 leading-relaxed line-clamp-2"
+            dangerouslySetInnerHTML={{ __html: excerpt }}
+          ></p>
 
           <div className="flex items-center gap-3 text-sm text-gray-400">
             <span>{date}</span>

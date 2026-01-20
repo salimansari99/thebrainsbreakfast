@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadImage } from "@/lib/uploadImage";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 const categories = ["Life", "Motivation", "Success", "Tech"];
 
@@ -86,7 +87,6 @@ export default function CreateThoughtPage() {
         </h1>
         <p className="text-gray-500">Share something worth reading slowly.</p>
       </header>
-
       {/* Cover Image */}
       <div className="space-y-3">
         <label className="text-sm font-medium">Cover image</label>
@@ -125,7 +125,6 @@ export default function CreateThoughtPage() {
           )}
         </div>
       </div>
-
       {/* Category */}
       <div className="space-y-3">
         <label className="text-sm font-medium">Category</label>
@@ -149,7 +148,6 @@ export default function CreateThoughtPage() {
           })}
         </div>
       </div>
-
       {/* Title */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-500">Title</label>
@@ -161,18 +159,11 @@ export default function CreateThoughtPage() {
           />
         </div>
       </div>
-
       {/* Content */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-500">Content</label>
-        <div className="rounded-xl border focus-within:border-indigo-500">
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={12}
-            className="w-full px-5 py-4 text-lg resize-none bg-transparent focus:outline-none"
-          />
-        </div>
+
+        <RichTextEditor value={content} onChange={setContent} />
       </div>
 
       {/* Meta */}
@@ -191,9 +182,7 @@ export default function CreateThoughtPage() {
           className="rounded-lg border p-3"
         />
       </div>
-
       {error && <p className="text-sm text-red-500">{error}</p>}
-
       {/* Actions */}
       <div className="flex gap-4 pt-12 pb-8">
         {/* Publish */}
