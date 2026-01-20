@@ -1,4 +1,4 @@
-import AnalyticsChart from "@/components/AnalyticsChart";
+import AnalyticsChart from "@/components/admin/AnalyticsChart";
 
 const mockData = [
   { date: "Jan 10", views: 120, likes: 30 },

@@ -8,6 +8,15 @@ import Thought from "@/models/Thought";
 // /api/thoughts?q=test
 // /api/thoughts?category=Life&q=test
 
+function calculateReadTime(text: string) {
+  if (!text) return "1 min read";
+
+  const words = text.trim().split(/\s+/).length;
+  const minutes = Math.max(1, Math.ceil(words / 200));
+
+  return `${minutes} min read`;
+}
+
 export async function GET(req: Request) {
   try {
     await connectDB();
@@ -97,7 +106,7 @@ export async function GET(req: Request) {
           day: "numeric",
           year: "numeric",
         }),
-        readTime: "4 min read",
+        readTime: calculateReadTime(t.excerpt),
       };
     });
 

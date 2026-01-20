@@ -6,6 +6,9 @@ import { uploadImage } from "@/lib/uploadImage";
 
 const categories = ["Life", "Motivation", "Success", "Tech"];
 
+const PLACEHOLDER_IMAGE =
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&q=80";
+
 export default function CreateThoughtPage() {
   const router = useRouter();
 
@@ -40,7 +43,7 @@ export default function CreateThoughtPage() {
       setLoading(true);
       setError(null);
 
-      let imageUrl = "";
+      let imageUrl = PLACEHOLDER_IMAGE;
 
       if (image) {
         imageUrl = await uploadImage(image);

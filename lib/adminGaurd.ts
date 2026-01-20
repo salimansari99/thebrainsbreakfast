@@ -3,7 +3,6 @@ import { authOptions } from "@/lib/auth";
 
 export async function requireAdmin() {
   const session = await getServerSession(authOptions);
-  console.log(session, "sessin");
 
   if (!session || session.user.role !== "ADMIN") {
     throw new Error("Unauthorized");

@@ -9,7 +9,7 @@ const adminLinks = [
   { name: "Dashboard", href: "/admin" },
   { name: "Thoughts", href: "/admin/thoughts" },
   { name: "Drafts", href: "/admin/drafts" },
-  { name: "Analytics", href: "/admin/analytics" },
+  // { name: "Analytics", href: "/admin/analytics" },
 ];
 
 export default function AdminNavbar() {

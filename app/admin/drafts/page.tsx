@@ -2,7 +2,7 @@ import Link from "next/link";
 import { connectDB } from "@/lib/db";
 import Thought from "@/models/Thought";
 import { requireAdmin } from "@/lib/adminGaurd";
-import { DeleteThought } from "@/components/DeleteThought";
+import { DeleteThought } from "@/components/admin/DeleteThought";
 import { PublishToggle } from "@/components/admin/PublishToggle";
 
 export default async function AdminDraftsPage() {

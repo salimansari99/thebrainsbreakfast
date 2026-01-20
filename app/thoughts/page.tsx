@@ -43,7 +43,7 @@ export default function ThoughtsPage() {
   ========================== */
   useEffect(() => {
     setPage(1);
-    setHasMore(true);
+    // setHasMore(true);
     setError(null);
   }, [activeCategory, debouncedQuery]);
 
@@ -74,6 +74,7 @@ export default function ThoughtsPage() {
         if (debouncedQuery) {
           params.append("q", debouncedQuery);
         }
+        console.log(params, "???");
 
         const res = await fetch(`/api/thoughts?${params.toString()}`, {
           signal: controller.signal,
@@ -203,8 +204,20 @@ export default function ThoughtsPage() {
           Load More
       ========================== */}
       {hasMore && (
-        <button disabled={loading} onClick={() => setPage((p) => p + 1)}>
-          Load more thoughts
+        <button
+          disabled={loading}
+          onClick={() => setPage((p) => p + 1)}
+          className="block mx-auto
+    px-8 py-3 rounded-full text-sm font-medium transition-all
+    border border-gray-300 dark:border-gray-700
+    text-gray-700 dark:text-gray-300
+    hover:bg-black hover:text-white
+    dark:hover:bg-white dark:hover:text-black
+    disabled:opacity-50 disabled:cursor-not-allowed
+    disabled:hover:bg-transparent disabled:hover:text-inherit
+  "
+        >
+          {loading ? "Loading…" : "Load more"}
         </button>
       )}
     </section>

@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import AdminNavbar from "@/components/AdminNavbar";
+import AdminNavbar from "@/components/admin/AdminNavbar";
 import { authOptions } from "@/lib/auth";
 
 export default async function AdminLayout({
